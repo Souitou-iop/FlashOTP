@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useCallback, useEffect, useRef } from "react"
-import { Plus, DownloadSimple, Trash, FileArrowDown, Pencil, Check, Copy, ClipboardText } from "@phosphor-icons/react"
+import { Plus, DownloadSimple, Trash, FileArrowDown, Pencil, Check, Copy, ClipboardText, Scan } from "@phosphor-icons/react"
 import { QRCodeSVG } from "qrcode.react"
 import JSZip from "jszip"
 import { saveAs } from "file-saver"
@@ -11,6 +11,7 @@ import type { TempMfaEntry } from "@/lib/types"
 import { AddMfaModal } from "./AddMfaModal"
 import { SecurityWarning } from "./SecurityWarning"
 import { SearchBar } from "./SearchBar"
+import { QrScanner } from "./QrScanner"
 
 export function TempMfaPanel() {
   const [entries, setEntries] = useLocalStorage<TempMfaEntry[]>(
@@ -18,6 +19,7 @@ export function TempMfaPanel() {
     []
   )
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [scannerOpen, setScannerOpen] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [editingEntry, setEditingEntry] = useState<TempMfaEntry | null>(null)
   const [search, setSearch] = useState("")
@@ -105,6 +107,36 @@ export function TempMfaPanel() {
       console.error("粘贴失败:", err)
     }
   }, [setEntries])
+
+  // 扫码导入
+  const handleScan = useCallback(
+    (uri: string) => {
+      try {
+        const url = new URL(uri)
+        const params = url.searchParams
+        const label = decodeURIComponent(url.pathname.replace(/^\//, ""))
+        const issuer = params.get("issuer") || label.split(":")[0] || ""
+        const name = label.includes(":") ? label.split(":").slice(1).join(":") : ""
+
+        const newEntry: TempMfaEntry = {
+          id: crypto.randomUUID(),
+          issuer,
+          name: decodeURIComponent(name),
+          secret: params.get("secret") || "",
+          algorithm: (params.get("algorithm") || "SHA1") as "SHA1" | "SHA256" | "SHA512",
+          digits: (parseInt(params.get("digits") || "6") as 6 | 8),
+          period: (parseInt(params.get("period") || "30") as 30 | 60),
+          createdAt: Date.now(),
+        }
+
+        setEntries((prev) => [newEntry, ...prev])
+        setScannerOpen(false)
+      } catch (err) {
+        console.error("扫码解析失败:", err)
+      }
+    },
+    [setEntries]
+  )
 
   // 编辑条目
   const handleEdit = useCallback(
@@ -336,6 +368,17 @@ export function TempMfaPanel() {
             粘贴
           </button>
           <button
+            onClick={() => setScannerOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm
+              bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700
+              text-zinc-600 dark:text-zinc-300
+              transition-colors"
+            title="扫描 QR 码"
+          >
+            <Scan size={16} weight="light" />
+            扫码
+          </button>
+          <button
             onClick={() => {
               setEditingEntry(null)
               setModalOpen(true)
@@ -418,6 +461,14 @@ export function TempMfaPanel() {
         editEntry={editingEntry}
         onEdit={handleEdit}
       />
+
+      {/* 扫码组件 */}
+      {scannerOpen && (
+        <QrScanner
+          onScan={handleScan}
+          onClose={() => setScannerOpen(false)}
+        />
+      )}
     </div>
   )
 }

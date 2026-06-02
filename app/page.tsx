@@ -12,7 +12,6 @@ import { EmptyState } from "@/components/EmptyState"
 import { SecurityWarning } from "@/components/SecurityWarning"
 import { TempMfaPanel } from "@/components/TempMfaPanel"
 import { SearchBar } from "@/components/SearchBar"
-import { PasswordGate } from "@/components/PasswordGate"
 import { parseMfaJson, parseOtpUri } from "@/lib/parser"
 import { categorize } from "@/lib/categorizer"
 import type { CategorizedEntry } from "@/lib/types"
@@ -207,9 +206,7 @@ export default function Home() {
             </div>
           )
         ) : (
-          <PasswordGate onUnlock={() => {}}>
-            <TempMfaPanel />
-          </PasswordGate>
+          <TempMfaPanel />
         )}
       </main>
 

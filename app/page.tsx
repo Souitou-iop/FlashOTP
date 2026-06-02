@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useState } from "react"
+import { motion } from "framer-motion"
 import JSZip from "jszip"
 import { saveAs } from "file-saver"
 import { QRCodeSVG } from "qrcode.react"
@@ -13,6 +14,7 @@ import { SecurityWarning } from "@/components/SecurityWarning"
 import { TempMfaPanel } from "@/components/TempMfaPanel"
 import { SearchBar } from "@/components/SearchBar"
 import { ImportHistory } from "@/components/ImportHistory"
+import { Button, IconButton } from "@/components/Button"
 import { parseMfaJson, parseOtpUri } from "@/lib/parser"
 import { categorize } from "@/lib/categorizer"
 import type { CategorizedEntry } from "@/lib/types"
@@ -117,12 +119,9 @@ export default function Home() {
         <div className="max-w-5xl mx-auto flex items-center justify-between px-4 sm:px-6 h-14">
           <div className="flex items-center gap-2">
             {tab === "import" && entries.length > 0 && (
-              <button
-                onClick={handleReset}
-                className="p-1.5 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors mr-1"
-              >
+              <IconButton onClick={handleReset} title="返回" className="mr-1">
                 <ArrowLeft size={18} weight="light" />
-              </button>
+              </IconButton>
             )}
             <ShieldCheck
               size={22}
@@ -139,7 +138,8 @@ export default function Home() {
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6">
         {/* 标签切换 */}
         <div className="flex items-center gap-1 p-1 mb-6 bg-zinc-100 dark:bg-zinc-800/50 rounded-xl w-fit mx-auto">
-          <button
+          <motion.button
+            whileTap={{ scale: 0.95 }}
             onClick={() => setTab("import")}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               tab === "import"
@@ -149,8 +149,9 @@ export default function Home() {
           >
             <FileArrowDown size={16} weight="light" />
             导入文件
-          </button>
-          <button
+          </motion.button>
+          <motion.button
+            whileTap={{ scale: 0.95 }}
             onClick={() => setTab("temp")}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               tab === "temp"
@@ -160,7 +161,7 @@ export default function Home() {
           >
             <Clock size={16} weight="light" />
             临时 MFA
-          </button>
+          </motion.button>
         </div>
 
         {/* 内容区域 */}

@@ -14,6 +14,7 @@ import { SearchBar } from "./SearchBar"
 import { QrScanner } from "./QrScanner"
 import { QrListItem } from "./QrListItem"
 import { ViewToggle } from "./ViewToggle"
+import { Button, IconButton } from "./Button"
 import { useKeyboard } from "@/lib/useKeyboard"
 
 export function TempMfaPanel() {
@@ -329,51 +330,28 @@ export function TempMfaPanel() {
         <div className="flex items-center gap-2">
           {entries.length > 0 && (
             <>
-              <button
-                onClick={toggleSelectAll}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm
-                  bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700
-                  text-zinc-600 dark:text-zinc-300
-                  transition-colors"
-              >
+              <Button onClick={toggleSelectAll} size="sm">
                 {allSelected ? "取消全选" : "全选"}
-              </button>
+              </Button>
 
               {hasSelection && (
                 <>
-                  <button
-                    onClick={handleDeleteSelected}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm
-                      bg-red-50 hover:bg-red-100 dark:bg-red-950/30 dark:hover:bg-red-950/50
-                      text-red-600 dark:text-red-400
-                      transition-colors"
-                  >
+                  <Button onClick={handleDeleteSelected} variant="danger" size="sm">
                     <Trash size={16} weight="light" />
                     删除选中
-                  </button>
-                  <button
-                    onClick={handleDownloadAll}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm
-                      bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700
-                      text-zinc-600 dark:text-zinc-300
-                      transition-colors"
-                  >
+                  </Button>
+                  <Button onClick={handleDownloadAll} size="sm">
                     <DownloadSimple size={16} weight="light" />
                     下载选中
-                  </button>
+                  </Button>
                 </>
               )}
 
               <div className="relative group">
-                <button
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm
-                    bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700
-                    text-zinc-600 dark:text-zinc-300
-                    transition-colors"
-                >
+                <Button size="sm">
                   <FileArrowDown size={16} weight="light" />
                   导出
-                </button>
+                </Button>
                 <div className="absolute right-0 top-full mt-1 w-40 py-1 rounded-xl
                   bg-white dark:bg-zinc-800
                   border border-zinc-200 dark:border-zinc-700
@@ -392,55 +370,38 @@ export function TempMfaPanel() {
               </div>
             </>
           )}
-          <button
-            onClick={handlePasteFromClipboard}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm
-              bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700
-              text-zinc-600 dark:text-zinc-300
-              transition-colors"
-            title="从剪贴板粘贴 otpauth:// URI"
-          >
+          <Button onClick={handlePasteFromClipboard} size="sm" title="从剪贴板粘贴 otpauth:// URI">
             <ClipboardText size={16} weight="light" />
             粘贴
-          </button>
-          <button
-            onClick={() => setScannerOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm
-              bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700
-              text-zinc-600 dark:text-zinc-300
-              transition-colors"
-            title="扫描 QR 码"
-          >
+          </Button>
+          <Button onClick={() => setScannerOpen(true)} size="sm" title="扫描 QR 码">
             <Scan size={16} weight="light" />
             扫码
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => {
               if (confirm("确定清除所有临时 MFA 数据？此操作不可恢复。")) {
                 removeEntries()
               }
             }}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm
-              bg-red-50 hover:bg-red-100 dark:bg-red-950/30 dark:hover:bg-red-950/50
-              text-red-600 dark:text-red-400
-              transition-colors"
+            variant="danger"
+            size="sm"
             title="清除所有数据"
           >
             <Trash size={16} weight="light" />
             清除
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => {
               setEditingEntry(null)
               setModalOpen(true)
             }}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm
-              bg-emerald-500 hover:bg-emerald-600 text-white
-              transition-colors"
+            variant="primary"
+            size="sm"
           >
             <Plus size={16} weight="light" />
             添加
-          </button>
+          </Button>
         </div>
       </div>
 

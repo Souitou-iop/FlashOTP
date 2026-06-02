@@ -118,9 +118,9 @@ export default function Home() {
       </header>
 
       {/* 主内容 */}
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-8">
+      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6">
         {/* 标签切换 */}
-        <div className="flex items-center gap-1 p-1 mb-8 bg-zinc-100 dark:bg-zinc-800/50 rounded-xl w-fit mx-auto">
+        <div className="flex items-center gap-1 p-1 mb-6 bg-zinc-100 dark:bg-zinc-800/50 rounded-xl w-fit mx-auto">
           <button
             onClick={() => setTab("import")}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -148,12 +148,12 @@ export default function Home() {
         {/* 内容区域 */}
         {tab === "import" ? (
           entries.length === 0 ? (
-            <div className="space-y-6">
-              <div className="text-center pt-8 pb-4">
-                <h1 className="text-3xl sm:text-4xl font-light tracking-tight text-zinc-900 dark:text-zinc-100">
+            <div className="space-y-4">
+              <div className="text-center pt-4 pb-2">
+                <h1 className="text-2xl sm:text-3xl font-light tracking-tight text-zinc-900 dark:text-zinc-100">
                   MFA 二维码管理器
                 </h1>
-                <p className="mt-3 text-sm text-zinc-500 dark:text-zinc-400">
+                <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
                   导入备份文件，自动生成可导出的 QR 码
                 </p>
               </div>
@@ -161,7 +161,7 @@ export default function Home() {
               <FileUploader onFileLoad={handleFileLoad} />
 
               {error && (
-                <div className="max-w-xl mx-auto p-4 rounded-2xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/40 text-sm text-red-600 dark:text-red-400">
+                <div className="max-w-xl mx-auto p-3 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/40 text-sm text-red-600 dark:text-red-400">
                   {error}
                 </div>
               )}

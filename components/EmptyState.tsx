@@ -4,11 +4,11 @@ import { ShieldCheck } from "@phosphor-icons/react"
 
 export function EmptyState() {
   return (
-    <div className="flex flex-col items-center justify-center py-24 text-center">
+    <div className="flex flex-col items-center justify-center py-8 text-center">
       <ShieldCheck
-        size={64}
+        size={48}
         weight="light"
-        className="text-zinc-300 dark:text-zinc-600 mb-6"
+        className="text-zinc-300 dark:text-zinc-600 mb-4"
       />
       <h2 className="text-xl font-medium text-zinc-700 dark:text-zinc-300 mb-2">
         导入你的 MFA 备份

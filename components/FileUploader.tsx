@@ -51,8 +51,8 @@ export function FileUploader({ onFileLoad }: FileUploaderProps) {
       onDragLeave={() => setDragging(false)}
       onDrop={handleDrop}
       className={`
-        relative flex flex-col items-center justify-center gap-4
-        w-full max-w-xl mx-auto p-12 rounded-2xl
+        relative flex flex-col items-center justify-center gap-3
+        w-full max-w-xl mx-auto p-8 rounded-2xl
         border-2 border-dashed transition-all duration-200 cursor-pointer
         ${
           dragging

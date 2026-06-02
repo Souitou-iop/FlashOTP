@@ -3,6 +3,7 @@
 import { QRCodeSVG } from "qrcode.react"
 import { Download, Copy, Check, Pencil, Trash } from "@phosphor-icons/react"
 import { useCallback, useRef, useState } from "react"
+import { motion } from "framer-motion"
 import type { CategorizedEntry } from "@/lib/types"
 
 interface QrCardProps {
@@ -54,12 +55,18 @@ export function QrCard({ entry, onEdit, onDelete }: QrCardProps) {
   }, [entry.uri])
 
   return (
-    <div
+    <motion.div
+      layout
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      whileHover={{ scale: 1.02 }}
+      transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
       className="group relative flex flex-col items-center gap-4 p-6 rounded-2xl
         bg-white dark:bg-zinc-900
         border border-zinc-200 dark:border-zinc-800
         hover:border-zinc-300 dark:hover:border-zinc-700
-        transition-all duration-200"
+        cursor-pointer"
     >
       {/* 右上角操作按钮 */}
       {(onEdit || onDelete) && (
@@ -147,6 +154,6 @@ export function QrCard({ entry, onEdit, onDelete }: QrCardProps) {
           {copied ? "已复制" : "复制 URI"}
         </button>
       </div>
-    </div>
+    </motion.div>
   )
 }

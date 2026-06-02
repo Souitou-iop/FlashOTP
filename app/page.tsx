@@ -12,6 +12,7 @@ import { EmptyState } from "@/components/EmptyState"
 import { SecurityWarning } from "@/components/SecurityWarning"
 import { TempMfaPanel } from "@/components/TempMfaPanel"
 import { SearchBar } from "@/components/SearchBar"
+import { ImportHistory } from "@/components/ImportHistory"
 import { parseMfaJson, parseOtpUri } from "@/lib/parser"
 import { categorize } from "@/lib/categorizer"
 import type { CategorizedEntry } from "@/lib/types"
@@ -184,6 +185,7 @@ export default function Home() {
               )}
 
               <EmptyState />
+              <ImportHistory onReimport={() => {}} />
               <SecurityWarning />
             </div>
           ) : (

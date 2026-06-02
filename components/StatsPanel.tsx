@@ -3,6 +3,7 @@
 import { useMemo } from "react"
 import type { CategorizedEntry, Category } from "@/lib/types"
 import { CATEGORIES } from "@/lib/types"
+import { motion } from "framer-motion"
 import {
   ChartLineUp,
   Wallet,
@@ -14,6 +15,9 @@ import {
   GameController,
   DotsSix,
   ChartBar,
+  Key,
+  Tag,
+  Clock,
 } from "@phosphor-icons/react"
 
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -76,7 +80,12 @@ export function StatsPanel({ entries }: StatsPanelProps) {
   if (entries.length === 0) return null
 
   return (
-    <div className="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800"
+    >
       <div className="flex items-center gap-2 mb-4">
         <ChartBar size={18} weight="light" className="text-zinc-400" />
         <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">数据统计</h3>
@@ -84,38 +93,70 @@ export function StatsPanel({ entries }: StatsPanelProps) {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {/* 总数 */}
-        <div className="text-center">
-          <p className="text-2xl font-light text-zinc-900 dark:text-zinc-100">
-            {stats.total}
-          </p>
+        <motion.div
+          initial={{ scale: 0.8 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.1 }}
+          className="text-center"
+        >
+          <div className="flex items-center justify-center gap-1 mb-1">
+            <Key size={16} weight="light" className="text-emerald-500" />
+            <p className="text-2xl font-light text-zinc-900 dark:text-zinc-100">
+              {stats.total}
+            </p>
+          </div>
           <p className="text-xs text-zinc-500 dark:text-zinc-400">总数</p>
-        </div>
+        </motion.div>
 
         {/* 分类数 */}
-        <div className="text-center">
-          <p className="text-2xl font-light text-zinc-900 dark:text-zinc-100">
-            {stats.categories.length}
-          </p>
+        <motion.div
+          initial={{ scale: 0.8 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.2 }}
+          className="text-center"
+        >
+          <div className="flex items-center justify-center gap-1 mb-1">
+            <ChartLineUp size={16} weight="light" className="text-blue-500" />
+            <p className="text-2xl font-light text-zinc-900 dark:text-zinc-100">
+              {stats.categories.length}
+            </p>
+          </div>
           <p className="text-xs text-zinc-500 dark:text-zinc-400">分类</p>
-        </div>
+        </motion.div>
 
         {/* 标签数 */}
-        <div className="text-center">
-          <p className="text-2xl font-light text-zinc-900 dark:text-zinc-100">
-            {stats.tags.length}
-          </p>
+        <motion.div
+          initial={{ scale: 0.8 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.3 }}
+          className="text-center"
+        >
+          <div className="flex items-center justify-center gap-1 mb-1">
+            <Tag size={16} weight="light" className="text-purple-500" />
+            <p className="text-2xl font-light text-zinc-900 dark:text-zinc-100">
+              {stats.tags.length}
+            </p>
+          </div>
           <p className="text-xs text-zinc-500 dark:text-zinc-400">标签</p>
-        </div>
+        </motion.div>
 
         {/* 最大分类 */}
-        <div className="text-center">
-          <p className="text-lg font-light text-zinc-900 dark:text-zinc-100 truncate">
-            {stats.categories[0]
-              ? CATEGORIES.find((c) => c.id === stats.categories[0].id)?.label.slice(0, 4)
-              : "-"}
-          </p>
+        <motion.div
+          initial={{ scale: 0.8 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.4 }}
+          className="text-center"
+        >
+          <div className="flex items-center justify-center gap-1 mb-1">
+            <Clock size={16} weight="light" className="text-amber-500" />
+            <p className="text-lg font-light text-zinc-900 dark:text-zinc-100 truncate">
+              {stats.categories[0]
+                ? CATEGORIES.find((c) => c.id === stats.categories[0].id)?.label.slice(0, 4)
+                : "-"}
+            </p>
+          </div>
           <p className="text-xs text-zinc-500 dark:text-zinc-400">最多</p>
-        </div>
+        </motion.div>
       </div>
 
       {/* 分类分布条 */}
@@ -169,6 +210,6 @@ export function StatsPanel({ entries }: StatsPanelProps) {
           </div>
         </div>
       )}
-    </div>
+    </motion.div>
   )
 }

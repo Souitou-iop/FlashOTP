@@ -7,11 +7,14 @@ import JSZip from "jszip"
 import { saveAs } from "file-saver"
 import * as OTPAuth from "otpauth"
 import { useLocalStorage } from "@/lib/useLocalStorage"
-import type { TempMfaEntry } from "@/lib/types"
+import type { TempMfaEntry, CategorizedEntry } from "@/lib/types"
 import { AddMfaModal } from "./AddMfaModal"
 import { SecurityWarning } from "./SecurityWarning"
 import { SearchBar } from "./SearchBar"
 import { QrScanner } from "./QrScanner"
+import { QrListItem } from "./QrListItem"
+import { ViewToggle } from "./ViewToggle"
+import { useKeyboard } from "@/lib/useKeyboard"
 
 export function TempMfaPanel() {
   const [entries, setEntries, removeEntries] = useLocalStorage<TempMfaEntry[]>(
@@ -23,6 +26,7 @@ export function TempMfaPanel() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editingEntry, setEditingEntry] = useState<TempMfaEntry | null>(null)
   const [search, setSearch] = useState("")
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
 
   // 搜索过滤
   const filteredEntries = entries.filter((entry) => {
@@ -107,6 +111,20 @@ export function TempMfaPanel() {
       console.error("粘贴失败:", err)
     }
   }, [setEntries])
+
+  // 快捷键
+  useKeyboard({
+    onPaste: handlePasteFromClipboard,
+    onScan: () => setScannerOpen(true),
+    onAdd: () => {
+      setEditingEntry(null)
+      setModalOpen(true)
+    },
+    onEscape: () => {
+      setScannerOpen(false)
+      setModalOpen(false)
+    },
+  })
 
   // 扫码导入
   const handleScan = useCallback(
@@ -305,6 +323,7 @@ export function TempMfaPanel() {
               已选 {selectedIds.size} 项
             </span>
           )}
+          <ViewToggle mode={viewMode} onChange={setViewMode} />
         </div>
 
         <div className="flex items-center gap-2">
@@ -440,21 +459,57 @@ export function TempMfaPanel() {
             })}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filteredEntries.map((entry) => (
-              <TempQrCard
-                key={entry.id}
-                entry={entry}
-                selected={selectedIds.has(entry.id)}
-                onToggleSelect={toggleSelect}
-                onDelete={handleDelete}
-                onEdit={(e) => {
-                  setEditingEntry(e)
-                  setModalOpen(true)
-                }}
-              />
-            ))}
-          </div>
+          {viewMode === "grid" ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {filteredEntries.map((entry) => (
+                <TempQrCard
+                  key={entry.id}
+                  entry={entry}
+                  selected={selectedIds.has(entry.id)}
+                  onToggleSelect={toggleSelect}
+                  onDelete={handleDelete}
+                  onEdit={(e) => {
+                    setEditingEntry(e)
+                    setModalOpen(true)
+                  }}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {filteredEntries.map((entry) => {
+                const uri = `otpauth://totp/${encodeURIComponent(entry.issuer)}${entry.name ? ":" + encodeURIComponent(entry.name) : ""}?secret=${entry.secret}&issuer=${encodeURIComponent(entry.issuer)}&algorithm=${entry.algorithm}&digits=${entry.digits}&period=${entry.period}`
+                const categorized: CategorizedEntry = {
+                  id: entry.id,
+                  name: entry.name || entry.issuer,
+                  issuer: entry.issuer,
+                  uri,
+                  parsed: {
+                    type: "totp",
+                    label: entry.name || entry.issuer,
+                    secret: entry.secret,
+                    issuer: entry.issuer,
+                    algorithm: entry.algorithm,
+                    digits: entry.digits,
+                    period: entry.period,
+                  },
+                  category: "other",
+                  tag: entry.tag,
+                }
+                return (
+                  <QrListItem
+                    key={entry.id}
+                    entry={categorized}
+                    onDelete={handleDelete}
+                    onEdit={(e) => {
+                      setEditingEntry(entry)
+                      setModalOpen(true)
+                    }}
+                  />
+                )
+              })}
+            </div>
+          )}
 
           {search && filteredEntries.length === 0 && (
             <div className="text-center py-12">

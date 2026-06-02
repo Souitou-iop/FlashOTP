@@ -4,6 +4,7 @@ import type { CategorizedEntry, Category } from "@/lib/types"
 import { CATEGORIES } from "@/lib/types"
 import { QrCard } from "./QrCard"
 import { StatsPanel } from "./StatsPanel"
+import { motion, AnimatePresence } from "framer-motion"
 import {
   ChartLineUp,
   Wallet,
@@ -101,11 +102,16 @@ export function QrGrid({ entries, onDownloadAll, onEdit, onDelete }: QrGridProps
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {catEntries.map((entry) => (
-                <QrCard key={entry.id} entry={entry} onEdit={onEdit} onDelete={onDelete} />
-              ))}
-            </div>
+            <motion.div
+              layout
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+            >
+              <AnimatePresence>
+                {catEntries.map((entry) => (
+                  <QrCard key={entry.id} entry={entry} onEdit={onEdit} onDelete={onDelete} />
+                ))}
+              </AnimatePresence>
+            </motion.div>
           </section>
         )
       })}

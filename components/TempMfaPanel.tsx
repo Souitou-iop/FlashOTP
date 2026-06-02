@@ -14,7 +14,7 @@ import { SearchBar } from "./SearchBar"
 import { QrScanner } from "./QrScanner"
 
 export function TempMfaPanel() {
-  const [entries, setEntries] = useLocalStorage<TempMfaEntry[]>(
+  const [entries, setEntries, removeEntries] = useLocalStorage<TempMfaEntry[]>(
     "temp-mfa-entries",
     []
   )
@@ -248,6 +248,15 @@ export function TempMfaPanel() {
     saveAs(blob, `google-auth-${new Date().toISOString().slice(0, 10)}.txt`)
   }, [entries, selectedEntries, hasSelection])
 
+  // CSV 转义：防止公式注入和嵌入引号
+  const escapeCsvCell = useCallback((value: string): string => {
+    // 如果值以公式字符开头，添加单引号前缀防止公式执行
+    const formulaChars = /^[=+\-@\t\r]/
+    const escaped = formulaChars.test(value) ? "'" + value : value
+    // 转义嵌入的双引号
+    return '"' + escaped.replace(/"/g, '""') + '"'
+  }, [])
+
   // 导出为 CSV 格式
   const handleExportCsv = useCallback(() => {
     const exportEntries = hasSelection ? selectedEntries : entries
@@ -255,13 +264,21 @@ export function TempMfaPanel() {
     const header = "Issuer,Name,Secret,Algorithm,Digits,Period,URI"
     const rows = exportEntries.map((entry) => {
       const uri = `otpauth://totp/${encodeURIComponent(entry.issuer)}${entry.name ? ":" + encodeURIComponent(entry.name) : ""}?secret=${entry.secret}&issuer=${encodeURIComponent(entry.issuer)}&algorithm=${entry.algorithm}&digits=${entry.digits}&period=${entry.period}`
-      return `"${entry.issuer}","${entry.name}","${entry.secret}","${entry.algorithm}",${entry.digits},${entry.period},"${uri}"`
+      return [
+        escapeCsvCell(entry.issuer),
+        escapeCsvCell(entry.name),
+        escapeCsvCell(entry.secret),
+        escapeCsvCell(entry.algorithm),
+        entry.digits,
+        entry.period,
+        escapeCsvCell(uri)
+      ].join(",")
     })
 
     const csv = [header, ...rows].join("\n")
     const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" })
     saveAs(blob, `mfa-export-${new Date().toISOString().slice(0, 10)}.csv`)
-  }, [entries, selectedEntries, hasSelection])
+  }, [entries, selectedEntries, hasSelection, escapeCsvCell])
 
   return (
     <div className="space-y-6">
@@ -377,6 +394,21 @@ export function TempMfaPanel() {
           >
             <Scan size={16} weight="light" />
             扫码
+          </button>
+          <button
+            onClick={() => {
+              if (confirm("确定清除所有临时 MFA 数据？此操作不可恢复。")) {
+                removeEntries()
+              }
+            }}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm
+              bg-red-50 hover:bg-red-100 dark:bg-red-950/30 dark:hover:bg-red-950/50
+              text-red-600 dark:text-red-400
+              transition-colors"
+            title="清除所有数据"
+          >
+            <Trash size={16} weight="light" />
+            清除
           </button>
           <button
             onClick={() => {

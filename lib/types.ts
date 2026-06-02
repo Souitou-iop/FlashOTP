@@ -70,6 +70,7 @@ export interface TempMfaEntry {
   algorithm: "SHA1" | "SHA256" | "SHA512"
   digits: 6 | 8
   period: 30 | 60
+  tag?: string // 自定义标签
   createdAt: number
 }
 

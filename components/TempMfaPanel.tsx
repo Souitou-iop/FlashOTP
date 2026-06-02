@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useCallback, useEffect, useRef } from "react"
-import { Plus, DownloadSimple, Trash, FileArrowDown, Pencil, Check, Copy } from "@phosphor-icons/react"
+import { Plus, DownloadSimple, Trash, FileArrowDown, Pencil, Check, Copy, ClipboardText } from "@phosphor-icons/react"
 import { QRCodeSVG } from "qrcode.react"
 import JSZip from "jszip"
 import { saveAs } from "file-saver"
@@ -10,6 +10,7 @@ import { useLocalStorage } from "@/lib/useLocalStorage"
 import type { TempMfaEntry } from "@/lib/types"
 import { AddMfaModal } from "./AddMfaModal"
 import { SecurityWarning } from "./SecurityWarning"
+import { SearchBar } from "./SearchBar"
 
 export function TempMfaPanel() {
   const [entries, setEntries] = useLocalStorage<TempMfaEntry[]>(
@@ -19,6 +20,18 @@ export function TempMfaPanel() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [modalOpen, setModalOpen] = useState(false)
   const [editingEntry, setEditingEntry] = useState<TempMfaEntry | null>(null)
+  const [search, setSearch] = useState("")
+
+  // 搜索过滤
+  const filteredEntries = entries.filter((entry) => {
+    if (!search) return true
+    const q = search.toLowerCase()
+    return (
+      entry.issuer.toLowerCase().includes(q) ||
+      entry.name.toLowerCase().includes(q) ||
+      (entry.tag && entry.tag.toLowerCase().includes(q))
+    )
+  })
 
   // 全选/取消全选
   const allSelected = entries.length > 0 && selectedIds.size === entries.length
@@ -50,6 +63,48 @@ export function TempMfaPanel() {
     },
     [setEntries]
   )
+
+  // 从剪贴板粘贴 URI
+  const handlePasteFromClipboard = useCallback(async () => {
+    try {
+      const text = await navigator.clipboard.readText()
+      if (!text) return
+
+      // 解析 otpauth:// URI
+      const lines = text
+        .split(/[\n\r]+/)
+        .map((l) => l.trim())
+        .filter((l) => l.startsWith("otpauth://"))
+
+      if (lines.length === 0) {
+        alert("剪贴板中没有找到 otpauth:// URI")
+        return
+      }
+
+      const newEntries: TempMfaEntry[] = lines.map((uri) => {
+        const url = new URL(uri)
+        const params = url.searchParams
+        const label = decodeURIComponent(url.pathname.replace(/^\//, ""))
+        const issuer = params.get("issuer") || label.split(":")[0] || ""
+        const name = label.includes(":") ? label.split(":").slice(1).join(":") : ""
+
+        return {
+          id: crypto.randomUUID(),
+          issuer,
+          name: decodeURIComponent(name),
+          secret: params.get("secret") || "",
+          algorithm: (params.get("algorithm") || "SHA1") as "SHA1" | "SHA256" | "SHA512",
+          digits: (parseInt(params.get("digits") || "6") as 6 | 8),
+          period: (parseInt(params.get("period") || "30") as 30 | 60),
+          createdAt: Date.now(),
+        }
+      })
+
+      setEntries((prev) => [...newEntries, ...prev])
+    } catch (err) {
+      console.error("粘贴失败:", err)
+    }
+  }, [setEntries])
 
   // 编辑条目
   const handleEdit = useCallback(
@@ -149,13 +204,49 @@ export function TempMfaPanel() {
     saveAs(blob, `mfa-backup-${new Date().toISOString().slice(0, 10)}.json`)
   }, [entries, selectedEntries, hasSelection])
 
+  // 导出为 Google Authenticator 格式（URI 列表）
+  const handleExportGoogleAuth = useCallback(() => {
+    const exportEntries = hasSelection ? selectedEntries : entries
+
+    const uris = exportEntries.map((entry) =>
+      `otpauth://totp/${encodeURIComponent(entry.issuer)}${entry.name ? ":" + encodeURIComponent(entry.name) : ""}?secret=${entry.secret}&issuer=${encodeURIComponent(entry.issuer)}&algorithm=${entry.algorithm}&digits=${entry.digits}&period=${entry.period}`
+    )
+
+    const blob = new Blob([uris.join("\n")], { type: "text/plain" })
+    saveAs(blob, `google-auth-${new Date().toISOString().slice(0, 10)}.txt`)
+  }, [entries, selectedEntries, hasSelection])
+
+  // 导出为 CSV 格式
+  const handleExportCsv = useCallback(() => {
+    const exportEntries = hasSelection ? selectedEntries : entries
+
+    const header = "Issuer,Name,Secret,Algorithm,Digits,Period,URI"
+    const rows = exportEntries.map((entry) => {
+      const uri = `otpauth://totp/${encodeURIComponent(entry.issuer)}${entry.name ? ":" + encodeURIComponent(entry.name) : ""}?secret=${entry.secret}&issuer=${encodeURIComponent(entry.issuer)}&algorithm=${entry.algorithm}&digits=${entry.digits}&period=${entry.period}`
+      return `"${entry.issuer}","${entry.name}","${entry.secret}","${entry.algorithm}",${entry.digits},${entry.period},"${uri}"`
+    })
+
+    const csv = [header, ...rows].join("\n")
+    const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" })
+    saveAs(blob, `mfa-export-${new Date().toISOString().slice(0, 10)}.csv`)
+  }, [entries, selectedEntries, hasSelection])
+
   return (
     <div className="space-y-6">
+      {/* 搜索框 */}
+      {entries.length > 0 && (
+        <SearchBar
+          value={search}
+          onChange={setSearch}
+          placeholder="搜索服务名称或账户..."
+        />
+      )}
+
       {/* 操作栏 */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <span className="text-2xl font-light text-zinc-900 dark:text-zinc-100">
-            {entries.length}
+            {filteredEntries.length}
           </span>
           <span className="text-sm text-zinc-500 dark:text-zinc-400">
             个临时条目
@@ -205,18 +296,45 @@ export function TempMfaPanel() {
                 </>
               )}
 
-              <button
-                onClick={handleExportJson}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm
-                  bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700
-                  text-zinc-600 dark:text-zinc-300
-                  transition-colors"
-              >
-                <FileArrowDown size={16} weight="light" />
-                导出 JSON
-              </button>
+              <div className="relative group">
+                <button
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm
+                    bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700
+                    text-zinc-600 dark:text-zinc-300
+                    transition-colors"
+                >
+                  <FileArrowDown size={16} weight="light" />
+                  导出
+                </button>
+                <div className="absolute right-0 top-full mt-1 w-40 py-1 rounded-xl
+                  bg-white dark:bg-zinc-800
+                  border border-zinc-200 dark:border-zinc-700
+                  shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible
+                  transition-all z-10">
+                  <button onClick={handleExportJson} className="w-full px-3 py-2 text-left text-sm hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-600 dark:text-zinc-300">
+                    JSON 格式
+                  </button>
+                  <button onClick={handleExportGoogleAuth} className="w-full px-3 py-2 text-left text-sm hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-600 dark:text-zinc-300">
+                    URI 列表
+                  </button>
+                  <button onClick={handleExportCsv} className="w-full px-3 py-2 text-left text-sm hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-600 dark:text-zinc-300">
+                    CSV 格式
+                  </button>
+                </div>
+              </div>
             </>
           )}
+          <button
+            onClick={handlePasteFromClipboard}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm
+              bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700
+              text-zinc-600 dark:text-zinc-300
+              transition-colors"
+            title="从剪贴板粘贴 otpauth:// URI"
+          >
+            <ClipboardText size={16} weight="light" />
+            粘贴
+          </button>
           <button
             onClick={() => {
               setEditingEntry(null)
@@ -248,7 +366,7 @@ export function TempMfaPanel() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {entries.map((entry) => (
+            {filteredEntries.map((entry) => (
               <TempQrCard
                 key={entry.id}
                 entry={entry}
@@ -262,6 +380,14 @@ export function TempMfaPanel() {
               />
             ))}
           </div>
+
+          {search && filteredEntries.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-zinc-500 dark:text-zinc-400">
+                没有找到匹配的条目
+              </p>
+            </div>
+          )}
         </>
       ) : (
         <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -514,6 +640,13 @@ function TempQrCard({
           <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate">
             {entry.name}
           </p>
+        )}
+        {entry.tag && (
+          <span className="inline-block px-2 py-0.5 text-xs rounded-full
+            bg-emerald-100 dark:bg-emerald-900/30
+            text-emerald-600 dark:text-emerald-400">
+            {entry.tag}
+          </span>
         )}
       </div>
 

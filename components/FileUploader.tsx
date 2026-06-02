@@ -83,7 +83,7 @@ export function FileUploader({ onFileLoad }: FileUploaderProps) {
           {dragging ? "松开以导入" : "拖拽 MFA 备份文件到这里"}
         </p>
         <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-          支持 Proton Authenticator 导出的 .json 文件
+          支持 Proton、Google、Microsoft Authenticator 或 URI 列表
         </p>
       </div>
     </div>

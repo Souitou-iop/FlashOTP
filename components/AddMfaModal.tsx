@@ -20,6 +20,7 @@ export function AddMfaModal({ open, onClose, onAdd, editEntry, onEdit }: AddMfaM
   const [algorithm, setAlgorithm] = useState<"SHA1" | "SHA256" | "SHA512">("SHA1")
   const [digits, setDigits] = useState<6 | 8>(6)
   const [period, setPeriod] = useState<30 | 60>(30)
+  const [tag, setTag] = useState("")
 
   const isEditMode = !!editEntry
 
@@ -32,6 +33,7 @@ export function AddMfaModal({ open, onClose, onAdd, editEntry, onEdit }: AddMfaM
       setAlgorithm(editEntry.algorithm)
       setDigits(editEntry.digits)
       setPeriod(editEntry.period)
+      setTag(editEntry.tag || "")
     } else {
       setIssuer("")
       setName("")
@@ -39,6 +41,7 @@ export function AddMfaModal({ open, onClose, onAdd, editEntry, onEdit }: AddMfaM
       setAlgorithm("SHA1")
       setDigits(6)
       setPeriod(30)
+      setTag("")
     }
   }, [editEntry, open])
 
@@ -67,6 +70,7 @@ export function AddMfaModal({ open, onClose, onAdd, editEntry, onEdit }: AddMfaM
           algorithm,
           digits,
           period,
+          tag: tag || undefined,
         })
       } else {
         onAdd({
@@ -77,6 +81,7 @@ export function AddMfaModal({ open, onClose, onAdd, editEntry, onEdit }: AddMfaM
           algorithm,
           digits,
           period,
+          tag: tag || undefined,
           createdAt: Date.now(),
         })
       }
@@ -88,6 +93,7 @@ export function AddMfaModal({ open, onClose, onAdd, editEntry, onEdit }: AddMfaM
       setAlgorithm("SHA1")
       setDigits(6)
       setPeriod(30)
+      setTag("")
       onClose()
     },
     [issuer, name, secret, algorithm, digits, period, isValidSecret, onAdd, onEdit, onClose, isEditMode, editEntry]
@@ -248,6 +254,26 @@ export function AddMfaModal({ open, onClose, onAdd, editEntry, onEdit }: AddMfaM
                 <option value={60}>60 秒</option>
               </select>
             </div>
+          </div>
+
+          {/* 标签 */}
+          <div>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
+              标签（可选）
+            </label>
+            <input
+              type="text"
+              value={tag}
+              onChange={(e) => setTag(e.target.value)}
+              placeholder="例如：工作、个人、交易所"
+              className="w-full px-3 py-2.5 rounded-xl
+                bg-zinc-50 dark:bg-zinc-800
+                border border-zinc-200 dark:border-zinc-700
+                text-zinc-900 dark:text-zinc-100
+                placeholder:text-zinc-400 dark:placeholder:text-zinc-500
+                focus:outline-none focus:ring-2 focus:ring-emerald-500/50
+                text-sm"
+            />
           </div>
 
           {/* QR 码预览 */}

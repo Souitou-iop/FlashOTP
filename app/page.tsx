@@ -11,10 +11,11 @@ import { QrGrid } from "@/components/QrGrid"
 import { EmptyState } from "@/components/EmptyState"
 import { SecurityWarning } from "@/components/SecurityWarning"
 import { TempMfaPanel } from "@/components/TempMfaPanel"
+import { SearchBar } from "@/components/SearchBar"
 import { parseMfaJson, parseOtpUri } from "@/lib/parser"
 import { categorize } from "@/lib/categorizer"
 import type { CategorizedEntry } from "@/lib/types"
-import { ShieldCheck, ArrowLeft, FileArrowDown, Clock } from "@phosphor-icons/react"
+import { ShieldCheck, ArrowLeft, FileArrowDown, Clock, Lock } from "@phosphor-icons/react"
 
 type Tab = "import" | "temp"
 
@@ -22,6 +23,17 @@ export default function Home() {
   const [tab, setTab] = useState<Tab>("import")
   const [entries, setEntries] = useState<CategorizedEntry[]>([])
   const [error, setError] = useState<string | null>(null)
+  const [search, setSearch] = useState("")
+
+  // 搜索过滤
+  const filteredEntries = entries.filter((entry) => {
+    if (!search) return true
+    const q = search.toLowerCase()
+    return (
+      entry.name.toLowerCase().includes(q) ||
+      entry.issuer.toLowerCase().includes(q)
+    )
+  })
 
   const handleFileLoad = useCallback((text: string) => {
     try {
@@ -170,17 +182,22 @@ export default function Home() {
               <SecurityWarning />
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-4">
+              <SearchBar
+                value={search}
+                onChange={setSearch}
+                placeholder="搜索服务名称或账户..."
+              />
               <SecurityWarning />
               {/* 隐藏的 QR 容器用于批量下载 */}
               <div className="fixed -left-[9999px] top-0" aria-hidden="true">
-                {entries.map((entry) => (
+                {filteredEntries.map((entry) => (
                   <div key={entry.id} data-qr-entry>
                     <QRCodeSVG value={entry.uri} size={512} level="M" />
                   </div>
                 ))}
               </div>
-              <QrGrid entries={entries} onDownloadAll={handleDownloadAll} />
+              <QrGrid entries={filteredEntries} onDownloadAll={handleDownloadAll} />
             </div>
           )
         ) : (

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useCallback, useEffect, useRef } from "react"
+import { motion } from "framer-motion"
 import { Plus, DownloadSimple, Trash, FileArrowDown, Pencil, Check, Copy, ClipboardText, Scan } from "@phosphor-icons/react"
 import { QRCodeSVG } from "qrcode.react"
 import JSZip from "jszip"
@@ -576,8 +577,11 @@ function TotpCode({ entry }: { entry: TempMfaEntry }) {
       {/* 当前验证码 */}
       <div>
         <div className="text-xs text-zinc-400 dark:text-zinc-500 mb-1.5 px-1">当前验证码</div>
-        <button
+        <motion.button
           onClick={handleCopy}
+          whileTap={{ scale: 0.98 }}
+          whileHover={{ scale: 1.01 }}
+          transition={{ type: "spring", stiffness: 400, damping: 17 }}
           className="w-full flex items-center justify-between px-4 py-3.5 rounded-xl
             bg-zinc-50 dark:bg-zinc-800/50
             border border-zinc-200 dark:border-zinc-700
@@ -590,7 +594,7 @@ function TotpCode({ entry }: { entry: TempMfaEntry }) {
           <span className="text-xs text-zinc-400 dark:text-zinc-500 group-hover:text-emerald-500 transition-colors">
             {copied ? "已复制" : "点击复制"}
           </span>
-        </button>
+        </motion.button>
       </div>
 
       {/* 下一个验证码预览 */}
@@ -689,8 +693,10 @@ function TempQrCard({
         }`}
     >
       {/* 左上角选择框 */}
-      <button
+      <motion.button
         onClick={() => onToggleSelect(entry.id)}
+        whileTap={{ scale: 0.8 }}
+        transition={{ type: "spring", stiffness: 400, damping: 17 }}
         className={`absolute top-3 left-3 w-5 h-5 rounded-md border-2 flex items-center justify-center
           transition-colors
           ${selected
@@ -699,30 +705,16 @@ function TempQrCard({
           }`}
       >
         {selected && <Check size={12} weight="bold" />}
-      </button>
+      </motion.button>
 
       {/* 右上角操作按钮 */}
       <div className="absolute top-3 right-3 flex gap-1">
-        <button
-          onClick={() => onEdit(entry)}
-          className="p-1.5 rounded-lg
-            bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700
-            text-zinc-500 dark:text-zinc-400
-            transition-colors"
-          title="编辑"
-        >
+        <IconButton onClick={() => onEdit(entry)} title="编辑">
           <Pencil size={14} weight="light" />
-        </button>
-        <button
-          onClick={() => onDelete(entry.id)}
-          className="p-1.5 rounded-lg
-            bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-950/50
-            text-red-500 dark:text-red-400
-            transition-colors"
-          title="删除"
-        >
+        </IconButton>
+        <IconButton onClick={() => onDelete(entry.id)} variant="danger" title="删除">
           <Trash size={14} weight="light" />
-        </button>
+        </IconButton>
       </div>
 
       {/* QR 码 */}
@@ -754,28 +746,14 @@ function TempQrCard({
 
       {/* 操作按钮 */}
       <div className="flex gap-2 w-full">
-        <button
-          onClick={handleDownload}
-          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs
-            bg-zinc-100 hover:bg-zinc-200
-            dark:bg-zinc-800 dark:hover:bg-zinc-700
-            text-zinc-600 dark:text-zinc-300
-            transition-colors"
-        >
+        <Button onClick={handleDownload} size="sm" className="flex-1">
           <DownloadSimple size={14} weight="light" />
           下载
-        </button>
-        <button
-          onClick={() => navigator.clipboard.writeText(uri)}
-          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs
-            bg-zinc-100 hover:bg-zinc-200
-            dark:bg-zinc-800 dark:hover:bg-zinc-700
-            text-zinc-600 dark:text-zinc-300
-            transition-colors"
-        >
+        </Button>
+        <Button onClick={() => navigator.clipboard.writeText(uri)} size="sm" className="flex-1">
           <Copy size={14} weight="light" />
           URI
-        </button>
+        </Button>
       </div>
     </div>
   )

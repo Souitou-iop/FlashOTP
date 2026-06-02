@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useCallback, useEffect } from "react"
+import { motion } from "framer-motion"
 import { X, Plus } from "@phosphor-icons/react"
 import { QRCodeSVG } from "qrcode.react"
 import type { TempMfaEntry } from "@/lib/types"
@@ -292,9 +293,12 @@ export function AddMfaModal({ open, onClose, onAdd, editEntry, onEdit }: AddMfaM
           )}
 
           {/* 提交按钮 */}
-          <button
+          <motion.button
             type="submit"
             disabled={!issuer || !isValidSecret}
+            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.02 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl
               bg-emerald-500 hover:bg-emerald-600 disabled:bg-zinc-300 dark:disabled:bg-zinc-700
               text-white font-medium text-sm
@@ -302,7 +306,7 @@ export function AddMfaModal({ open, onClose, onAdd, editEntry, onEdit }: AddMfaM
           >
             <Plus size={18} weight="light" />
             {isEditMode ? "保存修改" : "添加"}
-          </button>
+          </motion.button>
         </form>
       </div>
     </div>

@@ -2,6 +2,7 @@
 
 import { useTheme } from "next-themes"
 import { useEffect, useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import { Sun, Moon, Monitor } from "@phosphor-icons/react"
 
 export function ThemeToggle() {
@@ -37,7 +38,10 @@ export function ThemeToggle() {
     theme === "system" ? "跟随系统" : theme === "light" ? "浅色" : "深色"
 
   return (
-    <button
+    <motion.button
+      whileTap={{ scale: 0.9 }}
+      whileHover={{ scale: 1.05 }}
+      transition={{ type: "spring", stiffness: 400, damping: 17 }}
       onClick={cycle}
       className="flex items-center gap-2 px-3 py-2 rounded-xl
         bg-zinc-100 hover:bg-zinc-200
@@ -46,8 +50,18 @@ export function ThemeToggle() {
         transition-colors text-sm"
       title={`当前: ${label}，点击切换`}
     >
-      {icon}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={theme}
+          initial={{ scale: 0, rotate: -180 }}
+          animate={{ scale: 1, rotate: 0 }}
+          exit={{ scale: 0, rotate: 180 }}
+          transition={{ type: "spring", stiffness: 260, damping: 20 }}
+        >
+          {icon}
+        </motion.div>
+      </AnimatePresence>
       <span className="hidden sm:inline">{label}</span>
-    </button>
+    </motion.button>
   )
 }

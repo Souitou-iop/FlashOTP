@@ -4,6 +4,7 @@ import type { CategorizedEntry, Category } from "@/lib/types"
 import { CATEGORIES } from "@/lib/types"
 import { QrCard } from "./QrCard"
 import { StatsPanel } from "./StatsPanel"
+import { Button } from "./Button"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   ChartLineUp,
@@ -71,14 +72,9 @@ export function QrGrid({ entries, onDownloadAll, onEdit, onDelete }: QrGridProps
             个验证器，{orderedCategories.length} 个分类
           </span>
         </div>
-        <button
-          onClick={onDownloadAll}
-          className="px-5 py-2.5 rounded-xl text-sm font-medium
-            bg-emerald-500 hover:bg-emerald-600 text-white
-            transition-colors"
-        >
+        <Button onClick={onDownloadAll} variant="primary">
           批量下载全部 QR 码
-        </button>
+        </Button>
       </div>
 
       {/* 分类展示 */}

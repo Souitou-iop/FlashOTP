@@ -112,7 +112,7 @@ export default function Home() {
   return (
     <div className="min-h-dvh flex flex-col">
       {/* 导航栏 */}
-      <header className="sticky top-0 z-50 backdrop-blur-lg bg-zinc-50/80 dark:bg-zinc-950/80 border-b border-zinc-200 dark:border-zinc-800">
+      <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/60 dark:bg-zinc-950/60 border-b border-zinc-200/50 dark:border-zinc-800/50">
         <div className="max-w-5xl mx-auto flex items-center justify-between px-4 sm:px-6 h-14">
           <div className="flex items-center gap-2">
             {tab === "import" && entries.length > 0 && (

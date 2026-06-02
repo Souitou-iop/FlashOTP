@@ -12,6 +12,7 @@ import { EmptyState } from "@/components/EmptyState"
 import { SecurityWarning } from "@/components/SecurityWarning"
 import { TempMfaPanel } from "@/components/TempMfaPanel"
 import { SearchBar } from "@/components/SearchBar"
+import { PasswordGate } from "@/components/PasswordGate"
 import { parseMfaJson, parseOtpUri } from "@/lib/parser"
 import { categorize } from "@/lib/categorizer"
 import type { CategorizedEntry } from "@/lib/types"
@@ -102,6 +103,11 @@ export default function Home() {
   const handleReset = useCallback(() => {
     setEntries([])
     setError(null)
+  }, [])
+
+  // 删除导入条目
+  const handleDeleteEntry = useCallback((id: string) => {
+    setEntries((prev) => prev.filter((e) => e.id !== id))
   }, [])
 
   return (
@@ -197,11 +203,13 @@ export default function Home() {
                   </div>
                 ))}
               </div>
-              <QrGrid entries={filteredEntries} onDownloadAll={handleDownloadAll} />
+              <QrGrid entries={filteredEntries} onDownloadAll={handleDownloadAll} onDelete={handleDeleteEntry} />
             </div>
           )
         ) : (
-          <TempMfaPanel />
+          <PasswordGate onUnlock={() => {}}>
+            <TempMfaPanel />
+          </PasswordGate>
         )}
       </main>
 

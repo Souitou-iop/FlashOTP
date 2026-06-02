@@ -3,6 +3,7 @@
 import type { CategorizedEntry, Category } from "@/lib/types"
 import { CATEGORIES } from "@/lib/types"
 import { QrCard } from "./QrCard"
+import { StatsPanel } from "./StatsPanel"
 import {
   ChartLineUp,
   Wallet,
@@ -30,9 +31,11 @@ const ICON_MAP: Record<string, React.ElementType> = {
 interface QrGridProps {
   entries: CategorizedEntry[]
   onDownloadAll: () => void
+  onEdit?: (entry: CategorizedEntry) => void
+  onDelete?: (id: string) => void
 }
 
-export function QrGrid({ entries, onDownloadAll }: QrGridProps) {
+export function QrGrid({ entries, onDownloadAll, onEdit, onDelete }: QrGridProps) {
   // 按分类分组
   const grouped = entries.reduce(
     (acc, entry) => {
@@ -49,7 +52,10 @@ export function QrGrid({ entries, onDownloadAll }: QrGridProps) {
 
   return (
     <div className="space-y-8">
-      {/* 顶部统计栏 */}
+      {/* 数据统计 */}
+      <StatsPanel entries={entries} />
+
+      {/* 顶部操作栏 */}
       <div
         className="flex flex-col sm:flex-row items-center justify-between gap-4
           p-5 rounded-2xl
@@ -97,7 +103,7 @@ export function QrGrid({ entries, onDownloadAll }: QrGridProps) {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {catEntries.map((entry) => (
-                <QrCard key={entry.id} entry={entry} />
+                <QrCard key={entry.id} entry={entry} onEdit={onEdit} onDelete={onDelete} />
               ))}
             </div>
           </section>

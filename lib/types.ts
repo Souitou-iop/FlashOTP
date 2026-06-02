@@ -30,6 +30,7 @@ export interface CategorizedEntry {
   uri: string
   parsed: ParsedOtp
   category: Category
+  tag?: string
 }
 
 export type Category =

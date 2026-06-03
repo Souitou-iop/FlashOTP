@@ -53,10 +53,10 @@ export function ThemeToggle() {
       <AnimatePresence mode="wait">
         <motion.div
           key={theme}
-          initial={{ scale: 0, rotate: -180 }}
+          initial={{ scale: 0, rotate: -90 }}
           animate={{ scale: 1, rotate: 0 }}
-          exit={{ scale: 0, rotate: 180 }}
-          transition={{ type: "spring", stiffness: 260, damping: 20 }}
+          exit={{ scale: 0, rotate: 90 }}
+          transition={{ type: "spring", stiffness: 500, damping: 30, mass: 0.5 }}
         >
           {icon}
         </motion.div>

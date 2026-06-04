@@ -4,7 +4,7 @@
 
 ## 🚀 预览
 
-**https://flashotp.pages.dev**
+**https://flashotp.ebato.win/**
 
 ## ✨ 功能
 
